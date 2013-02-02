@@ -42,8 +42,14 @@ app.get('/', function(req, res) {
         return;
       }
 
-      if (!element.attr('width') || !element.attr('height')) return;
+      var width = parseInt(element.attr('width')), height = parseInt(element.attr('height'));
+      if (!width || !height || (width < 40 || height < 40)) return;
+
       element.attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
+    });
+
+    $('.headlinesOnly img').each(function(idx) {
+      $(this).attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
     });
 
     body = $.html();
