@@ -22,7 +22,7 @@ app.configure('production', function() {
     redisURL.port, redisURL.hostname, {no_ready_check: true});
 });
 
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
   request('http://www.nytimes.com', function (error, response, body) {
     $ = cheerio.load(body);
     $('.byline').text('By PAUL KRUGMAN');
@@ -30,14 +30,15 @@ app.get('/', function(req, res){
       element = $(element);
       if (element.attr('id') == 'mastHead') return;
       if (!element.attr('width') || !element.attr('height')) return;
-      $(this).attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
+      element.attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
     });
 
     body = $.html();
+    res.charset = 'utf-8';
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('Content-Length', body.length);
     res.end(body);
-  })
+  });
 });
 
 app.listen(process.env.PORT || 5000);
