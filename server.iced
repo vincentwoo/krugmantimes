@@ -11,10 +11,10 @@ KRUGMANZ = [
   'http://www.princeton.edu/~paw/web_exclusives/more/more_pics/more6_krugman.jpg'
 ]
 app = express();
+maxAge = 0;
 
 app.configure 'development', () ->
   db = redis.createClient();
-  maxAge = 0;
 
 app.configure 'production', () ->
   redisURL = url.parse process.env.REDISCLOUD_URL
@@ -22,44 +22,38 @@ app.configure 'production', () ->
   maxAge = 86400000;
 
 
-# app.get('/', function(req, res) {
-#   #http://access.alchemyapi.com/calls/url/URLGetRankedNamedEntities?apikey=3c834e2a6bb7f81706b92a9aebe3d307d53ff9ec&url=nytimes.com&outputMode=json
-#   request('http://www.nytimes.com', function (error, response, body) {
-#     $ = cheerio.load(body);
+app.get '/', (req, res) ->
+  #http://access.alchemyapi.com/calls/url/URLGetRankedNamedEntities?apikey=3c834e2a6bb7f81706b92a9aebe3d307d53ff9ec&url=nytimes.com&outputMode=json
+  request 'http://www.nytimes.com', (error, response, body) ->
+    $ = cheerio.load(body);
 
-#     $('title').text('The Krugman Times');
-#     $('.byline').text('By PAUL KRUGMAN');
+    $('title').text 'The Krugman Times';
+    $('.byline').text 'By PAUL KRUGMAN';
 
-#     $('img').each(function(idx, element) {
-#       element = $(element);
+    $('img').each (idx, element) ->
+      element = $(element);
 
-#       if (element.attr('id') == 'mastheadLogo') {
-#         element.attr('src', '/images/krugman_times_logo.png');
-#         element.parent().prev().remove(); // Delete document.write script tag
-#         element.parent().replaceWith(element); // replace noscript tag with image
-#         return;
-#       }
+      if element.attr('id') == 'mastheadLogo'
+        element.attr('src', '/images/krugman_times_logo.png');
+        element.parent().prev().remove();      # delete document.write script tag
+        element.parent().replaceWith(element); # replace noscript tag with image
+        return
 
-#       var width = parseInt(element.attr('width')), height = parseInt(element.attr('height'));
-#       if (!width || !height || (width < 40 || height < 40)) return;
+      width  = parseInt(element.attr('width'))
+      height = parseInt(element.attr('height'))
+      return if !width || !height || (width < 40 || height < 40)
 
-#       element.attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
-#     });
+      element.attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
 
-#     $('.headlinesOnly img').each(function(idx) {
-#       $(this).attr('src', KRUGMANZ[idx % KRUGMANZ.length]);
-#     });
+    $('.headlinesOnly img').each (idx) ->
+      $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
 
-#     body = $.html();
-#     res.charset = 'utf-8';
-#     res.setHeader('Content-Type', 'text/html');
-#     res.setHeader('Content-Length', body.length);
-#     res.end(body);
-#   });
-# });
+    body = $.html();
+    res.charset = 'utf-8';
+    res.setHeader 'Content-Type', 'text/html';
+    res.setHeader 'Content-Length', body.length;
+    res.end body;
 
-# app.use(express.static(__dirname + '/public', {maxAge: maxAge}));
+app.use(express.static(__dirname + '/public', {maxAge: maxAge}))
 
-app.listen process.env.PORT || 5000;
-
-console.log 'hello'
+app.listen process.env.PORT || 5000
