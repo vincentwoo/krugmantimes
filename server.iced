@@ -47,13 +47,13 @@ retrieve_nytimes = (cb) ->
 
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
+    $('script').remove()
 
     $('img').each (idx, element) ->
       element = $(element)
 
       if element.attr('id') == 'mastheadLogo'
         element.attr 'src', '/images/krugman_times_logo.png'
-        element.parent().prev().remove()      # delete document.write script tag
         element.parent().replaceWith(element) # replace noscript tag with image
         return
 
