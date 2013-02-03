@@ -11,19 +11,34 @@ KRUGMANZ = [
   'http://www.princeton.edu/~paw/web_exclusives/more/more_pics/more6_krugman.jpg'
 ]
 
-app = express();
-app.use express.logger()
-app.use express.compress()
-
 if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
-  #db = redis.createClient redisURL.port, redisURL.hostname, {no_ready_check: true}
+  #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   maxAge = 86400000
 else
   #db = redis.createClient()
   maxAge = 0
 
-app.use express.static(__dirname + '/public', {maxAge: maxAge})
+app = express()
+app.use express.logger()
+app.use express.compress()
+app.use express.static(__dirname + '/public', maxAge: maxAge)
+app.listen process.env.PORT || 5000
+
+app.get '/', (req, res) ->
+  await retrieve_nytimes defer body, headlines, summaries
+  await
+    extract_phrases headlines, defer headline_phrases
+    extract_phrases summaries, defer summary_phrases
+
+  for phrase in headline_phrases.concat(summary_phrases)
+    regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
+    body = body.replace regex, '$1Paul Krugman$2'
+
+  res.charset = 'utf-8'
+  res.setHeader 'Content-Type', 'text/html'
+  res.setHeader 'Content-Length', body.length
+  res.end body
 
 retrieve_nytimes = (cb) ->
   request 'http://www.nytimes.com', (error, response, body) ->
@@ -69,20 +84,3 @@ extract_phrases = (text, cb) ->
       keywords = JSON.parse keywords
       return cb([]) unless keywords.status == 'OK'
       cb (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
-
-app.get '/', (req, res) ->
-  await retrieve_nytimes defer body, headlines, summaries
-  await
-    extract_phrases headlines, defer headline_phrases
-    extract_phrases summaries, defer summary_phrases
-
-  for phrase in headline_phrases.concat(summary_phrases)
-    regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
-    body = body.replace regex, '$1Paul Krugman$2'
-
-  res.charset = 'utf-8'
-  res.setHeader 'Content-Type', 'text/html'
-  res.setHeader 'Content-Length', body.length
-  res.end body
-
-app.listen process.env.PORT || 5000
