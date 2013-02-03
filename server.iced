@@ -10,6 +10,19 @@ KRUGMANZ = [
   'http://www.skepticmoney.com/wp-content/uploads/2012/08/Paul-Krugman.jpg'
   'http://www.princeton.edu/~paw/web_exclusives/more/more_pics/more6_krugman.jpg'
 ]
+TRACKING = """
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38200823-1']);
+    _gaq.push(['_setDomainName', 'krugmantimes.com']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+  """
 
 if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
@@ -65,6 +78,8 @@ retrieve_nytimes = (cb) ->
 
     $('.headlinesOnly img').each (idx) ->
       $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
+
+    $('body').append TRACKING
 
     headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
     summaries = $('p.summary').text()
