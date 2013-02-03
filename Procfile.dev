@@ -1,1 +1,2 @@
-web: supervisor -e iced boot.js
+web: supervisor -n exit server.js
+watch: iced --watch --compile server.iced

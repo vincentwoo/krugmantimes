@@ -12,6 +12,8 @@ KRUGMANZ = [
 ]
 
 app = express();
+app.use express.logger()
+app.use express.compress()
 
 if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
@@ -49,7 +51,7 @@ retrieve_nytimes = (cb) ->
     $('.headlinesOnly img').each (idx) ->
       $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
 
-    headlines = ($(headline).text().replace(/\n/g, " ").trim() for headline in $('h2, h3, h5')).join('\n')
+    headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
     summaries = $('p.summary').text()
     cb $.html(), headlines, summaries
 
