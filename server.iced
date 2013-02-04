@@ -29,9 +29,9 @@ else
   ip = ':remote-addr'
 
 app = express()
+app.use express.compress()
 app.use express.static(__dirname + '/public', maxAge: maxAge)
 app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
-app.use express.compress()
 app.listen process.env.PORT || 5000
 
 app.get '/', (req, res) ->
@@ -52,7 +52,7 @@ app.get '/', (req, res) ->
 retrieve_nytimes = (cb) ->
   request 'http://www.nytimes.com', (error, response, body) ->
     return cb('', '', '') if error || response.statusCode != 200
-    $ = cheerio.load body
+    $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
@@ -66,8 +66,8 @@ retrieve_nytimes = (cb) ->
         element.attr 'src', '/images/krugman_times_logo.png'
         return element.parent().replaceWith(element) # replace noscript tag with image
 
-      if element.attr('src').indexOf('/adx/') != -1
-        return element.remove();
+      if (element.attr('src') || element.attr('SRC')).indexOf('/adx/') != -1
+        return element.remove() # kill some ad images
 
       width  = parseInt element.attr('width')
       height = parseInt element.attr('height')
