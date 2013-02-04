@@ -22,13 +22,15 @@ if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
   #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   maxAge = 86400000
+  ip = ':req[X-Forwarded-For]'
 else
   #db = redis.createClient()
   maxAge = 0
+  ip = ':remote-addr'
 
 app = express()
 app.use express.static(__dirname + '/public', maxAge: maxAge)
-app.use express.logger(':remote-addr - :status(:method): :response-time ms - :url')
+app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
 app.use express.compress()
 app.listen process.env.PORT || 5000
 
