@@ -27,9 +27,9 @@ else
   maxAge = 0
 
 app = express()
-app.use express.logger()
-app.use express.compress()
 app.use express.static(__dirname + '/public', maxAge: maxAge)
+app.use express.logger(':remote-addr - :status(:method): :response-time ms - :url')
+app.use express.compress()
 app.listen process.env.PORT || 5000
 
 app.get '/', (req, res) ->
@@ -62,8 +62,10 @@ retrieve_nytimes = (cb) ->
 
       if element.attr('id') == 'mastheadLogo'
         element.attr 'src', '/images/krugman_times_logo.png'
-        element.parent().replaceWith(element) # replace noscript tag with image
-        return
+        return element.parent().replaceWith(element) # replace noscript tag with image
+
+      if element.attr('src').indexOf('/adx/') != -1
+        return element.remove();
 
       width  = parseInt element.attr('width')
       height = parseInt element.attr('height')
@@ -71,7 +73,7 @@ retrieve_nytimes = (cb) ->
 
       element.replaceWith fit_krugman_photo(width, height)
 
-    $('.headlinesOnly img').each () ->
+    $('.headlinesOnly .thumb img').each () ->
       $(this).replaceWith fit_krugman_photo(50, 50)
 
     headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
