@@ -1,15 +1,20 @@
-express = require('express')
-redis   = require('redis')
-url     = require('url')
-cheerio = require('cheerio')
-request = require('request')
+express = require 'express'
+redis   = require 'redis'
+url     = require 'url'
+cheerio = require 'cheerio'
+request = require 'request'
+fs      = require 'fs'
+gm      = require('gm').subClass imageMagick: true
 
-KRUGMANZ = [
-  'http://media.salon.com/2010/04/pistols_at_dawn_paul_krugman_vs_andrew_sorkin.jpg'
-  'http://www.wired.com/images_blogs/underwire/2012/05/Krugman-6601.jpg'
-  'http://www.skepticmoney.com/wp-content/uploads/2012/08/Paul-Krugman.jpg'
-  'http://www.princeton.edu/~paw/web_exclusives/more/more_pics/more6_krugman.jpg'
-]
+KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
+KRUGMANZ = []
+
+for filename in fs.readdirSync(KRUGMANZ_DIR)
+  await gm("#{KRUGMANZ_DIR}/#{filename}").size defer err, dimensions
+  dimensions.ratio = dimensions.width / dimensions.height
+  dimensions.path = "/images/krugmanz/#{filename}"
+  KRUGMANZ.push dimensions
+
 TRACKING = """
   <script type="text/javascript">
     var _gaq = _gaq || [];
@@ -55,12 +60,13 @@ app.get '/', (req, res) ->
 
 retrieve_nytimes = (cb) ->
   request 'http://www.nytimes.com', (error, response, body) ->
-    return '' if error || response.statusCode != 200
+    return cb('', '', '') if error || response.statusCode != 200
     $ = cheerio.load body
 
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
     $('script').remove()
+    $('body').append TRACKING
 
     $('img').each (idx, element) ->
       element = $(element)
@@ -70,16 +76,14 @@ retrieve_nytimes = (cb) ->
         element.parent().replaceWith(element) # replace noscript tag with image
         return
 
-      width  = parseInt(element.attr('width'))
-      height = parseInt(element.attr('height'))
-      return if !width || !height || (width < 40 || height < 40)
+      width  = parseInt element.attr('width')
+      height = parseInt element.attr('height')
+      return if !width || !height || width < 40 || height < 40
 
-      element.attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
+      element.attr 'src', KRUGMANZ[idx % KRUGMANZ.length].path
 
     $('.headlinesOnly img').each (idx) ->
-      $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length]
-
-    $('body').append TRACKING
+      $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length].path
 
     headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
     summaries = $('p.summary').text()
