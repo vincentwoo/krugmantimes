@@ -5,6 +5,7 @@ cheerio = require 'cheerio'
 request = require 'request'
 fs      = require 'fs'
 gm      = require('gm').subClass imageMagick: true
+_       = require 'underscore'
 
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANZ = []
@@ -16,20 +17,6 @@ await
       dimensions.ratio = dimensions.width / dimensions.height
       dimensions.path = "/images/krugmanz/#{filename}"
       done dimensions
-
-TRACKING = """
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-38200823-1']);
-    _gaq.push(['_setDomainName', 'krugmantimes.com']);
-    _gaq.push(['_trackPageview']);
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-  """
 
 if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
@@ -82,10 +69,10 @@ retrieve_nytimes = (cb) ->
       height = parseInt element.attr('height')
       return if !width || !height || width < 40 || height < 40
 
-      element.attr 'src', KRUGMANZ[idx % KRUGMANZ.length].path
+      element.replaceWith fit_krugman_photo(width, height)
 
-    $('.headlinesOnly img').each (idx) ->
-      $(this).attr 'src', KRUGMANZ[idx % KRUGMANZ.length].path
+    $('.headlinesOnly img').each () ->
+      $(this).replaceWith fit_krugman_photo(50, 50)
 
     headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
     summaries = $('p.summary').text()
@@ -105,3 +92,29 @@ extract_phrases = (text, cb) ->
       keywords = JSON.parse keywords
       return cb([]) unless keywords.status == 'OK'
       cb (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
+
+fit_krugman_photo = (width, height) ->
+  photo = KRUGMANZ[_.random(KRUGMANZ.length - 1)]
+  """
+    <span style="width: #{width}px; height: #{height}px;
+      display: inline-block;
+      background-image: url('#{photo.path}');
+      background-size: cover;
+      background-position: center center;
+      ">
+    </span>
+  """
+
+TRACKING = """
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-38200823-1']);
+    _gaq.push(['_setDomainName', 'krugmantimes.com']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+  """
