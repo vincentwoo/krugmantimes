@@ -1,1 +1,1 @@
-web: node boot.js
+web: ./node_modules/iced-coffee-script/bin/coffee server.iced

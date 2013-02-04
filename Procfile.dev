@@ -1,2 +1,2 @@
-web: supervisor -n exit server.js
-watch: iced --watch --compile server.iced
+web: ./node_modules/supervisor/lib/cli-wrapper.js -n exit server.js
+watch: ./node_modules/iced-coffee-script/bin/coffee --watch --compile server.iced

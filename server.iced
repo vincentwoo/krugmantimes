@@ -9,11 +9,13 @@ gm      = require('gm').subClass imageMagick: true
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANZ = []
 
-for filename in fs.readdirSync(KRUGMANZ_DIR)
-  await gm("#{KRUGMANZ_DIR}/#{filename}").size defer err, dimensions
-  dimensions.ratio = dimensions.width / dimensions.height
-  dimensions.path = "/images/krugmanz/#{filename}"
-  KRUGMANZ.push dimensions
+await
+  fs.readdirSync(KRUGMANZ_DIR).forEach (filename, idx) ->
+    done = defer KRUGMANZ[idx]
+    gm("#{KRUGMANZ_DIR}/#{filename}").size (err, dimensions) ->
+      dimensions.ratio = dimensions.width / dimensions.height
+      dimensions.path = "/images/krugmanz/#{filename}"
+      done dimensions
 
 TRACKING = """
   <script type="text/javascript">
