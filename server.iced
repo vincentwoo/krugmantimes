@@ -69,8 +69,8 @@ retrieve_nytimes = (cb) ->
       if (element.attr('src') || element.attr('SRC')).indexOf('/adx/') != -1
         return element.remove() # kill some ad images
 
-      width  = parseInt element.attr('width')
-      height = parseInt element.attr('height')
+      width  = +element.attr 'width'
+      height = +element.attr 'height'
       return if !width || !height || width < 40 || height < 40
 
       element.replaceWith fit_krugman_photo(width, height)
