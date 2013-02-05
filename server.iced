@@ -29,9 +29,9 @@ else
   ip = ':remote-addr'
 
 app = express()
-app.use express.compress()
 app.use express.static(__dirname + '/public', maxAge: maxAge)
 app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
+app.use express.compress()
 app.listen process.env.PORT || 5000
 
 app.get '/', (req, res) ->
@@ -57,6 +57,7 @@ retrieve_nytimes = (cb) ->
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
     $('script').remove()
+    $('.adWrapper').remove()
     $('body').append TRACKING
 
     $('img').each (idx, element) ->
@@ -71,7 +72,7 @@ retrieve_nytimes = (cb) ->
 
       width  = +element.attr 'width'
       height = +element.attr 'height'
-      return if !width || !height || width < 40 || height < 40
+      return unless width > 40 && height > 40
 
       element.replaceWith fit_krugman_photo(width, height)
 

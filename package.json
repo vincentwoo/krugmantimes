@@ -8,11 +8,13 @@
     "cheerio":            "0.x",
     "request":            "2.x",
     "gm":                 "1.x",
-    "supervisor":         "0.x",
     "underscore":         "1.x"
+  },
+  "devDependencies": {
+    "supervisor":         "0.x"
   },
   "engines": {
     "node": "0.8.x",
-    "npm": "1.x"
+    "npm": "1.1.x"
   }
 }
