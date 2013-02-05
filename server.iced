@@ -28,8 +28,10 @@ app.get '/', (req, res) ->
   res.end body
 
 retrieve_nytimes = (cb) ->
+  console.log 'Requesting nytimes.com html'
   request 'http://www.nytimes.com', (error, response, body) ->
     return cb('', '', '') if error || response.statusCode != 200
+    console.log "Loaded nytimes.com - #{Math.floor(body.length/1024)}kb"
     $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
@@ -58,10 +60,11 @@ retrieve_nytimes = (cb) ->
       $(this).replaceWith fit_krugman_photo(50, 50)
 
     headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
-    summaries = $('p.summary').text()
+    summaries = ($('p.summary').map () -> $(this).text().trim()).join '\n'
     cb $.html(), headlines, summaries
 
 extract_phrases = (text, cb) ->
+  console.log "Requesting keyword extraction for: '#{text.substr 0, 40}...'"
   request
     url: ' http://access.alchemyapi.com/calls/text/TextGetRankedKeywords'
     method: 'post'
@@ -74,7 +77,10 @@ extract_phrases = (text, cb) ->
       return cb([]) if error || response.statusCode != 200
       keywords = JSON.parse keywords
       return cb([]) unless keywords.status == 'OK'
-      cb (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
+
+      keywords = (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
+      console.log "Found keywords: #{keywords.slice(0, 5).join(', ')}..."
+      cb keywords
 
 fit_krugman_photo = (width, height) ->
   photo = KRUGMANZ[_.random(KRUGMANZ.length - 1)]
@@ -89,11 +95,13 @@ fit_krugman_photo = (width, height) ->
   """
 
 if process.env.NODE_ENV == 'production'
+  console.log 'Initializing krugmantimes for production'
   redisURL = url.parse process.env.REDISCLOUD_URL
   #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   maxAge = 86400000
   ip = ':req[X-Forwarded-For]'
 else
+  console.log 'Initializing krugmantimes for development'
   #db = redis.createClient()
   maxAge = 0
   ip = ':remote-addr'
@@ -101,6 +109,7 @@ else
 app.use express.static(__dirname + '/public', maxAge: maxAge)
 app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
 app.use express.compress()
+console.log 'Express middleware installed'
 
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANIZMS = [
@@ -116,11 +125,14 @@ KRUGMANIZMS = [
   'liquidity trap'
   'zero lower bound'
 ]
+console.log 'Reading directory of krugman images'
 await fs.readdir KRUGMANZ_DIR, defer err, filenames
+console.log 'Images found, getting their dimensions'
 await
   filenames.forEach (filename, idx) ->
     done = defer KRUGMANZ[idx]
     gm("#{KRUGMANZ_DIR}/#{filename}").size (err, dimensions) ->
+      console.log "Krugman #{idx} loaded, #{dimensions.width}px x #{dimensions.height}px"
       dimensions.ratio = dimensions.width / dimensions.height
       dimensions.path = "/images/krugmanz/#{filename}"
       done dimensions
