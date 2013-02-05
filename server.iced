@@ -7,44 +7,9 @@ fs      = require 'fs'
 gm      = require('gm').subClass imageMagick: true
 _       = require 'underscore'
 
-KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
-KRUGMANZ = []
-KRUGMANIZMS = [
-  'New Keynesianism'
-  'stimulus'
-  'trillion dollar coin'
-  "market efficiency"
-  'deficit spending'
-  'financial crisis'
-  'government intervention'
-  'shadow banking system'
-  'debt ceiling'
-  'liquidity trap'
-  'zero lower bound'
-]
-
-await
-  fs.readdirSync(KRUGMANZ_DIR).forEach (filename, idx) ->
-    done = defer KRUGMANZ[idx]
-    gm("#{KRUGMANZ_DIR}/#{filename}").size (err, dimensions) ->
-      dimensions.ratio = dimensions.width / dimensions.height
-      dimensions.path = "/images/krugmanz/#{filename}"
-      done dimensions
-
-if process.env.NODE_ENV == 'production'
-  redisURL = url.parse process.env.REDISCLOUD_URL
-  #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
-  maxAge = 86400000
-  ip = ':req[X-Forwarded-For]'
-else
-  #db = redis.createClient()
-  maxAge = 0
-  ip = ':remote-addr'
-
-app = express()
-app.use express.static(__dirname + '/public', maxAge: maxAge)
-app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
-app.use express.compress()
+KRUGMANZ = [] # array of krugman images
+KRUGMANIZMS = [] # array of krugman sayings
+app = express() # main app object
 app.listen process.env.PORT || 5000
 
 app.get '/', (req, res) ->
@@ -122,6 +87,43 @@ fit_krugman_photo = (width, height) ->
       ">
     </span>
   """
+
+if process.env.NODE_ENV == 'production'
+  redisURL = url.parse process.env.REDISCLOUD_URL
+  #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
+  maxAge = 86400000
+  ip = ':req[X-Forwarded-For]'
+else
+  #db = redis.createClient()
+  maxAge = 0
+  ip = ':remote-addr'
+
+app.use express.static(__dirname + '/public', maxAge: maxAge)
+app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
+app.use express.compress()
+
+KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
+KRUGMANIZMS = [
+  'New Keynesianism'
+  'stimulus'
+  'trillion dollar coin'
+  "market efficiency"
+  'deficit spending'
+  'financial crisis'
+  'government intervention'
+  'shadow banking system'
+  'debt ceiling'
+  'liquidity trap'
+  'zero lower bound'
+]
+await fs.readdir KRUGMANZ_DIR, defer err, filenames
+await
+  filenames.forEach (filename, idx) ->
+    done = defer KRUGMANZ[idx]
+    gm("#{KRUGMANZ_DIR}/#{filename}").size (err, dimensions) ->
+      dimensions.ratio = dimensions.width / dimensions.height
+      dimensions.path = "/images/krugmanz/#{filename}"
+      done dimensions
 
 TRACKING = """
   <script type="text/javascript">
