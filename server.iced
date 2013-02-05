@@ -9,6 +9,19 @@ _       = require 'underscore'
 
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANZ = []
+KRUGMANIZMS = [
+  'New Keynesianism'
+  'stimulus'
+  'trillion dollar coin'
+  "market efficiency"
+  'deficit spending'
+  'financial crisis'
+  'government intervention'
+  'shadow banking system'
+  'debt ceiling'
+  'liquidity trap'
+  'zero lower bound'
+]
 
 await
   fs.readdirSync(KRUGMANZ_DIR).forEach (filename, idx) ->
@@ -42,7 +55,7 @@ app.get '/', (req, res) ->
 
   for phrase in headline_phrases.concat(summary_phrases)
     regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
-    body = body.replace regex, '$1Paul Krugman$2'
+    body = body.replace regex, "$1#{KRUGMANIZMS[_.random(KRUGMANIZMS.length - 1)]}$2"
 
   res.charset = 'utf-8'
   res.setHeader 'Content-Type', 'text/html'
