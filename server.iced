@@ -13,14 +13,7 @@ app = express() # main app object
 app.listen process.env.PORT || 5000
 
 app.get '/', (req, res) ->
-  await retrieve_nytimes defer body, headlines, summaries
-  await
-    extract_phrases headlines, defer headline_phrases
-    extract_phrases summaries, defer summary_phrases
-
-  for phrase in headline_phrases.concat(summary_phrases)
-    regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
-    body = body.replace regex, "$1#{KRUGMANIZMS[_.random(KRUGMANIZMS.length - 1)]}$2"
+  await retrieve_nytimes defer body
 
   res.charset = 'utf-8'
   res.setHeader 'Content-Type', 'text/html'
@@ -36,8 +29,7 @@ retrieve_nytimes = (cb) ->
 
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
-    $('script').remove()
-    $('.adWrapper').remove()
+    $('script, .adWrapper, .singleAd, .advertisement').remove()
     $('body').append TRACKING
 
     $('img').each (idx, element) ->
@@ -59,9 +51,28 @@ retrieve_nytimes = (cb) ->
     $('.headlinesOnly .thumb img').each () ->
       $(this).replaceWith fit_krugman_photo(50, 50)
 
-    headlines = ($('h2, h3, h5').map () -> $(this).text().replace(/\n/g, " ").trim()).join '\n'
-    summaries = ($('p.summary').map () -> $(this).text().trim()).join '\n'
-    cb $.html(), headlines, summaries
+    await
+      $('#main .baseLayout .story').each () ->
+        story = $(this)
+        headlines = story.find('h2, h3, h5')
+        summaries = story.find('.summary')
+        text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
+        return unless text.length > 50
+        done = defer()
+        extract_phrases text, (phrases) ->
+          krugmanizms = _.sample KRUGMANIZMS, phrases.length
+          phrases.forEach (phrase) ->
+            return unless krugmanizm = krugmanizms.pop()
+            regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
+            headlines.toArray().concat(summaries.toArray()).forEach (elem) ->
+              $(elem).text($(elem).text().replace regex, "$1#{krugmanizm}$2")
+            headlines.each () ->
+              $(this).text($(this).text().titlecase())
+            summaries.each () ->
+              $(this).text($(this).text().sentencecase()) 
+          done()
+
+    cb $.html()
 
 extract_phrases = (text, cb) ->
   console.log "Requesting keyword extraction for: '#{text.substr 0, 40}...'"
@@ -128,14 +139,12 @@ KRUGMANIZMS = [
 console.log 'Reading directory of krugman images'
 await fs.readdir KRUGMANZ_DIR, defer err, filenames
 console.log 'Images found, getting their dimensions'
-await
-  filenames.forEach (filename, idx) ->
-    done = defer KRUGMANZ[idx]
-    gm("#{KRUGMANZ_DIR}/#{filename}").size (err, dimensions) ->
-      console.log "Krugman #{idx} loaded, #{dimensions.width}px x #{dimensions.height}px"
-      dimensions.ratio = dimensions.width / dimensions.height
-      dimensions.path = "/images/krugmanz/#{filename}"
-      done dimensions
+filenames.forEach (filename, idx) ->
+  await gm("#{KRUGMANZ_DIR}/#{filename}").size defer err, dimensions
+  console.log "Krugman #{idx} loaded, #{dimensions.width}px x #{dimensions.height}px"
+  dimensions.ratio = dimensions.width / dimensions.height
+  dimensions.path = "/images/krugmanz/#{filename}"
+  KRUGMANZ[idx] = dimensions
 
 TRACKING = """
   <script type="text/javascript">
@@ -150,3 +159,23 @@ TRACKING = """
     })();
   </script>
   """
+
+String.prototype.titlecase = () ->
+  this.split(' ').map (str) ->
+    ret = str.trim().split('')
+    return '' if ret.length == 0
+    ret[0] = ret[0].toUpperCase();
+    ret.join('')
+  .join(' ')
+
+String.prototype.sentencecase = () ->
+  ret = this.trim()
+  ret = ret.charAt(0).toUpperCase() + ret.slice(1)
+  ret.replace /([.?!]\s+)(\w)/g, (match, pre, char) ->
+    pre + char.toUpperCase();
+
+_.sample = (obj, number) ->
+  if number == undefined
+    if obj.length > 0 then obj[_.random(obj.length - 1)] else null
+  else 
+    if number > 0 then _.shuffle(obj).slice(0, number) else []
