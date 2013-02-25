@@ -11,15 +11,6 @@ _       = require 'underscore'
 KRUGMANZ = [] # array of krugman images
 KRUGMANIZMS = [] # array of krugman sayings
 app = express() # main app object
-app.listen process.env.PORT || 5000
-
-app.get '/', (req, res) ->
-  await retrieve_nytimes defer body
-
-  res.charset = 'utf-8'
-  res.setHeader 'Content-Type', 'text/html'
-  res.setHeader 'Content-Length', body.length
-  res.end body
 
 retrieve_nytimes = (cb) ->
   await db.get "/", defer err, reply
@@ -153,6 +144,14 @@ else
 app.use express.static(__dirname + '/public', maxAge: maxAge)
 app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
 app.use express.compress()
+app.get '/', (req, res) ->
+  await retrieve_nytimes defer body
+
+  res.charset = 'utf-8'
+  res.setHeader 'Content-Type', 'text/html'
+  res.setHeader 'Content-Length', body.length
+  res.end body
+app.listen process.env.PORT || 5000
 console.log 'Express middleware installed'
 
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
