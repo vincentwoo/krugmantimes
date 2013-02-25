@@ -1,5 +1,6 @@
 express = require 'express'
 redis   = require 'redis'
+crypto  = require 'crypto'
 url     = require 'url'
 cheerio = require 'cheerio'
 request = require 'request'
@@ -21,16 +22,22 @@ app.get '/', (req, res) ->
   res.end body
 
 retrieve_nytimes = (cb) ->
+  await db.get "/", defer err, reply
+  if reply
+    console.log 'Cache hit for homepage'
+    return cb(reply)
   console.log 'Requesting nytimes.com html'
   request 'http://www.nytimes.com', (error, response, body) ->
     return cb('', '', '') if error || response.statusCode != 200
     console.log "Loaded nytimes.com - #{Math.floor(body.length/1024)}kb"
     $ = cheerio.load body, lowerCaseTags: true
 
+    $('body').append TRACKING
+    $('head').append CSS
+
     $('title').text 'The Krugman Times'
     $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
-    $('body').append TRACKING
 
     $('img').each (idx, element) ->
       element = $(element)
@@ -48,36 +55,45 @@ retrieve_nytimes = (cb) ->
 
       element.replaceWith fit_krugman_photo(width, height)
 
-    $('.headlinesOnly .thumb img').each () ->
+    $('.headlinesOnly .thumb img').each ->
       $(this).replaceWith fit_krugman_photo(50, 50)
 
+    $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
+
     await
-      $('#main .baseLayout .story').each () ->
+      $('#main .baseLayout .story, #photoSpotRegion .columnGroup').each ->
         story = $(this)
         headlines = story.find('h2, h3, h5')
         summaries = story.find('.summary')
         text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
         return unless text.length > 50
         done = defer()
-        extract_phrases text, (phrases) ->
-          krugmanizms = _.sample KRUGMANIZMS, phrases.length
-          phrases.forEach (phrase) ->
-            return unless krugmanizm = krugmanizms.pop()
-            regex = new RegExp "(\\W)#{phrase}(\\W)", 'g'
+        extract_keywords text, (keywords) ->
+          keywords.forEach (keyword) ->
+            regex = new RegExp "(\\W)#{keyword.phrase}(\\W)", 'g'
             headlines.toArray().concat(summaries.toArray()).forEach (elem) ->
-              $(elem).text($(elem).text().replace regex, "$1#{krugmanizm}$2")
-            headlines.each () ->
+              $(elem).text($(elem).text().replace regex, "$1#{keyword.replacement}$2")
+            headlines.each ->
               $(this).text($(this).text().titlecase())
-            summaries.each () ->
-              $(this).text($(this).text().sentencecase()) 
+            summaries.each ->
+              $(this).text($(this).text().sentencecase())
           done()
 
-    cb $.html()
+    html = $.html()
+    db.set '/', html
+    db.expire '/', 300
+    cb html
 
-extract_phrases = (text, cb) ->
-  console.log "Requesting keyword extraction for: '#{text.substr 0, 40}...'"
+extract_keywords = (text, cb) ->
+  hash = crypto.createHash('md5').update(text).digest('hex');
+  console.log "Requesting keyword extraction for text with fingerprint #{hash}"
+  await db.get "text:#{hash}", defer err, reply
+  if reply
+    console.log "Cache hit for text with fingerprint #{hash}"
+    return cb JSON.parse(reply)
+
   request
-    url: ' http://access.alchemyapi.com/calls/text/TextGetRankedKeywords'
+    url: 'http://access.alchemyapi.com/calls/text/TextGetRankedKeywords'
     method: 'post'
     qs:
       apikey: process.env.ALCHEMY_API_KEY
@@ -91,29 +107,44 @@ extract_phrases = (text, cb) ->
 
       keywords = (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
       console.log "Found keywords: #{keywords.slice(0, 5).join(', ')}..."
+
+      krugmanizms = KRUGMANIZMS.sample keywords.length
+      keywords = keywords.map((keyword) ->
+        phrase: keyword
+        replacement: krugmanizms.pop()
+      ).filter (keyword) -> keyword.replacement
+
+      db.set "text:#{hash}", JSON.stringify(keywords)
       cb keywords
 
 fit_krugman_photo = (width, height) ->
   photo = KRUGMANZ[_.random(KRUGMANZ.length - 1)]
-  """
-    <span style="width: #{width}px; height: #{height}px;
-      display: inline-block;
-      background-image: url('#{photo.path}');
-      background-size: cover;
-      background-position: center center;
-      ">
-    </span>
-  """
+  if width && height
+    """
+      <div class="krugman-photo"
+        style="width: #{width}px; height: #{height}px;
+        background-image: url('#{photo.path}');">
+      </div>
+    """
+  else
+    """
+      <div class="krugman-container">
+          <div class="krugman-dummy"></div>
+          <div class="krugman-element"
+            style="background-image: url('#{photo.path}');">
+          </div>
+      </div>
+    """
 
 if process.env.NODE_ENV == 'production'
   console.log 'Initializing krugmantimes for production'
   redisURL = url.parse process.env.REDISCLOUD_URL
-  #db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
+  db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   maxAge = 86400000
   ip = ':req[X-Forwarded-For]'
 else
   console.log 'Initializing krugmantimes for development'
-  #db = redis.createClient()
+  db = redis.createClient()
   maxAge = 0
   ip = ':remote-addr'
 
@@ -159,8 +190,34 @@ TRACKING = """
     })();
   </script>
   """
+CSS = """
+  <style>
+    .krugman-container {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+    }
+    .krugman-dummy {
+        padding-top: 75%; /* 4:3 aspect ratio */
+    }
+    .krugman-element {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-size: cover;
+        background-position: center center;
+    }
+    .krugman-photo {
+      display: inline-block;
+      background-size: cover;
+      background-position: center center;
+    }
+  </style>
+  """
 
-String.prototype.titlecase = () ->
+String.prototype.titlecase = ->
   this.split(' ').map (str) ->
     ret = str.trim().split('')
     return '' if ret.length == 0
@@ -168,14 +225,14 @@ String.prototype.titlecase = () ->
     ret.join('')
   .join(' ')
 
-String.prototype.sentencecase = () ->
+String.prototype.sentencecase = ->
   ret = this.trim()
   ret = ret.charAt(0).toUpperCase() + ret.slice(1)
   ret.replace /([.?!]\s+)(\w)/g, (match, pre, char) ->
     pre + char.toUpperCase();
 
-_.sample = (obj, number) ->
+Array.prototype.sample = (number) ->
   if number == undefined
-    if obj.length > 0 then obj[_.random(obj.length - 1)] else null
-  else 
-    if number > 0 then _.shuffle(obj).slice(0, number) else []
+    if this.length > 0 then this[_.random(obj.length - 1)] else null
+  else
+    if number > 0 then _.shuffle(this).slice(0, number) else []
