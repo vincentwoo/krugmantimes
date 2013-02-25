@@ -8,7 +8,8 @@
     "cheerio":            "0.x",
     "request":            "2.x",
     "gm":                 "1.x",
-    "underscore":         "1.x"
+    "underscore":         "1.x",
+    "newrelic":           "x"
   },
   "devDependencies": {
     "supervisor":         "0.x"

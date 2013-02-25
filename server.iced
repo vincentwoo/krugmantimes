@@ -1,3 +1,5 @@
+require 'newrelic' if process.env.NODE_ENV == 'production'
+
 express = require 'express'
 redis   = require 'redis'
 crypto  = require 'crypto'
