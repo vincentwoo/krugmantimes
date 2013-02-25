@@ -73,7 +73,7 @@ retrieve_nytimes = (cb) ->
 
     html = $.html()
     db.set '/', html
-    db.expire '/', 300
+    db.expire '/', expiry
     cb html
 
 extract_keywords = (text, cb) ->
@@ -134,11 +134,13 @@ if process.env.NODE_ENV == 'production'
   db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   db.auth redisURL.auth.split(':')[1]
   maxAge = 86400000
+  expiry = 60
   ip = ':req[X-Forwarded-For]'
 else
   console.log 'Initializing krugmantimes for development'
   db = redis.createClient()
   maxAge = 0
+  expiry = 0
   ip = ':remote-addr'
 
 app.use express.static(__dirname + '/public', maxAge: maxAge)
@@ -158,15 +160,13 @@ KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANIZMS = [
   'New Keynesianism'
   'stimulus'
-  'trillion dollar coin'
-  "market efficiency"
+  'market efficiency'
   'deficit spending'
   'financial crisis'
-  'government intervention'
   'shadow banking system'
   'debt ceiling'
   'liquidity trap'
-  'zero lower bound'
+  'Paul Krugman'
 ]
 console.log 'Reading directory of krugman images'
 await fs.readdir KRUGMANZ_DIR, defer err, filenames
