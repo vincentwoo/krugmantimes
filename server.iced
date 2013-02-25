@@ -23,6 +23,7 @@ app.get '/', (req, res) ->
 
 retrieve_nytimes = (cb) ->
   await db.get "/", defer err, reply
+  return cb('') if err
   if reply
     console.log 'Cache hit for homepage'
     return cb(reply)
@@ -140,6 +141,7 @@ if process.env.NODE_ENV == 'production'
   console.log 'Initializing krugmantimes for production'
   redisURL = url.parse process.env.REDISCLOUD_URL
   db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
+  db.auth redisURL.auth.split(':')[1]
   maxAge = 86400000
   ip = ':req[X-Forwarded-For]'
 else
