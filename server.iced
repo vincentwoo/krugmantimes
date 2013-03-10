@@ -28,6 +28,7 @@ retrieve_nytimes = (cb) ->
 
     $('title').text 'The Krugman Times'
     $('#date').html 'A Version Of The New York Times By Its Only Columnist <a id="krugman-faq" href="">(what is this?)</a>'
+    $('#page').addClass 'avgrund-contents'
     $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
 
