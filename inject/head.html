@@ -1,8 +1,68 @@
 <style>
-  #shell {
+  body {
     position: relative;
-    z-index: 100;
-    background: #fff;
+    -webkit-perspective: 4000px;
+       -moz-perspective: 4000px;
+        -ms-perspective: 4000px;
+         -o-perspective: 4000px;
+            perspective: 4000px;
+  }
+  #shell {
+    -webkit-transform-style: preserve-3d;
+       -moz-transform-style: preserve-3d;
+        -ms-transform-style: preserve-3d;
+         -o-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+
+    -webkit-transition: -webkit-transform 1s;
+       -moz-transition:    -moz-transform 1s;
+        -ms-transition:     -ms-transform 1s;
+         -o-transition:      -o-transform 1s;
+            transition:         transform 1s;
+  }
+  #flip-wrap, #krugman-faq-popup {
+    position: absolute;
+    -webkit-backface-visibility: hidden;
+       -moz-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+         -o-backface-visibility: hidden;
+            backface-visibility: hidden;
+
+    -webkit-transition: opacity 1s;
+       -moz-transition: opacity 1s;
+        -ms-transition: opacity 1s;
+         -o-transition: opacity 1s;
+            transition: opacity 1s;
+  }
+  #shell.flipped, #krugman-faq-popup {
+    -webkit-transform: rotateY( 180deg );
+       -moz-transform: rotateY( 180deg );
+        -ms-transform: rotateY( 180deg );
+         -o-transform: rotateY( 180deg );
+            transform: rotateY( 180deg );
+  }
+  #shell.flipped #flip-wrap {
+    opacity: 0;
+  }
+  #shell.flipped #krugman-faq-popup {
+    opacity: 1;
+  }
+  #krugman-faq-popup {
+    opacity: 0;
+    width: 970px;
+    border: 1px solid #999;
+    font-size: 14px;
+    top: 20px;
+  }
+  #krugman-faq-popup div {
+    width: 410px;
+    margin: 40px auto;
+  }
+  #krugman-faq-popup button {
+    padding: 10px;
+    background: #eee;
+    border: 1px solid #ccc;
+    margin-top: 20px;
   }
   #date {
     font-size: 12px;
@@ -29,115 +89,5 @@
     display: inline-block;
     background-size: cover;
     background-position: center center;
-  }
-
-  .avgrund-active body {
-    -webkit-transform: scale( 0.95 );
-       -moz-transform: scale( 0.95 );
-        -ms-transform: scale( 0.95 );
-         -o-transform: scale( 0.95 );
-            transform: scale( 0.95 );
-  }
-
-  .avgrund-cover {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    visibility: hidden;
-    opacity: 0;
-    background: rgba( 0, 0, 0, 0.5 );
-  }
-    .avgrund-active .avgrund-cover {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    .avgrund-active .avgrund-contents {
-      -webkit-filter: blur(2px);
-         -moz-filter: blur(2px);
-          -ms-filter: blur(2px);
-           -o-filter: blur(2px);
-              filter: blur(2px);
-    }
-    .no-blur.avgrund-active .avgrund-contents {
-      -webkit-filter: none;
-         -moz-filter: none;
-          -ms-filter: none;
-           -o-filter: none;
-              filter: none;
-    }
-
-  .avgrund-popup {
-    position: absolute;
-    width: 340px;
-    left: 50%;
-    top: 0;
-    margin: 0 0 0 -190px;
-    visibility: hidden;
-    opacity: 0;
-    z-index: 1000;
-    padding: 20px;
-
-    background: white;
-    box-shadow: 0px 0px 20px rgba( 0, 0, 0, 0.6 );
-    border-radius: 3px;
-
-    -webkit-transform: scale( 0.8 );
-       -moz-transform: scale( 0.8 );
-        -ms-transform: scale( 0.8 );
-         -o-transform: scale( 0.8 );
-            transform: scale( 0.8 );
-  }
-    .avgrund-active .avgrund-popup-animate {
-      visibility: visible;
-      opacity: 1;
-
-      -webkit-transform: scale( 1.5 );
-         -moz-transform: scale( 1.5 );
-          -ms-transform: scale( 1.5 );
-           -o-transform: scale( 1.5 );
-              transform: scale( 1.5 );
-    }
-    .avgrund-popup.stack {
-      -webkit-transform: scale( 1.5 );
-         -moz-transform: scale( 1.5 );
-          -ms-transform: scale( 1.5 );
-           -o-transform: scale( 1.5 );
-              transform: scale( 1.5 );
-    }
-    .avgrund-active .avgrund-popup.stack {
-      -webkit-transform: scale( 1.1 );
-         -moz-transform: scale( 1.1 );
-          -ms-transform: scale( 1.1 );
-           -o-transform: scale( 1.1 );
-              transform: scale( 1.1 );
-    }
-
-
-  .avgrund-ready body,
-  .avgrund-ready .avgrund-contents,
-  .avgrund-ready .avgrund-popup,
-  .avgrund-ready .avgrund-cover {
-    -webkit-transform-origin: 50% 50%;
-       -moz-transform-origin: 50% 50%;
-        -ms-transform-origin: 50% 50%;
-         -o-transform-origin: 50% 50%;
-            transform-origin: 50% 50%;
-
-    -webkit-transition: 0.3s all cubic-bezier(0.250, 0.460, 0.450, 0.940);
-       -moz-transition: 0.3s all cubic-bezier(0.250, 0.460, 0.450, 0.940);
-        -ms-transition: 0.3s all cubic-bezier(0.250, 0.460, 0.450, 0.940);
-         -o-transition: 0.3s all cubic-bezier(0.250, 0.460, 0.450, 0.940);
-            transition: 0.3s all cubic-bezier(0.250, 0.460, 0.450, 0.940);
-  }
-  .avgrund-ready .avgrund-popup.no-transition {
-    -webkit-transition: none;
-       -moz-transition: none;
-        -ms-transition: none;
-         -o-transition: none;
-            transition: none;
   }
 </style>

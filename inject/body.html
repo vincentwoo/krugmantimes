@@ -1,98 +1,4 @@
-<div class="avgrund-cover"></div>
-<div id="krugman-faq-popup" class="avgrund-popup">
-  <p>
-    <a href="/">Krugmantimes.com</a> is a webpage that takes the current version of the
-    <a href="http://www.nytimes.com">New York Times</a> and replaces pretty much
-    everything with <a href="http://en.wikipedia.org/wiki/Paul_Krugman">Paul Krugman</a>
-    media. This means swapping out the masthead, parsing articles for
-    keywords and putting in econometrics words, and replacing most of the images
-    with Paul's sweet, sweet mug.
-  </p>
-  <p>
-    This is a Node.js app, and the <a href="https://github.com/vincentwoo/krugmantimes">source code</a>
-    is freely available. If you'd like to talk about anything at all, you're
-    more than welcome to email me at <a href="mailto:me@vincentwoo.com">me@vincentwoo.com</a>.
-  </p>
-  <p>
-    P.S. Try to get Krugman himself to acknowledge this by tweeting
-    <a href="https://twitter.com/NYTimeskrugman">@NYTimeskrugman</a>. It would
-    mean the world to me.
-  </p>
-  <button id="krugman-faq-close">Close</button>
-</div>
-
 <script type="text/javascript">
-  document.querySelector('#krugman-faq').addEventListener('click', function(event) {
-    Avgrund.show('#krugman-faq-popup');
-    event.preventDefault();
-  });
-  document.querySelector('#krugman-faq-close').addEventListener('click', function(event) {
-    Avgrund.hide();
-    event.preventDefault();
-  });
-</script>
-
-<script type="text/javascript">
-/*!
- * avgrund 0.1
- * http://lab.hakim.se/avgrund
- * MIT licensed
- *
- * Copyright (C) 2012 Hakim El Hattab, http://hakim.se
- */
-var Avgrund = (function(){
-
-  var container = document.documentElement,
-    popup = document.querySelector( '.avgrund-popup-animate' ),
-    cover = document.querySelector( '.avgrund-cover' ),
-    currentState = null;
-
-  container.className = container.className.replace( /\s+$/gi, '' ) + ' avgrund-ready';
-
-  // Deactivate on ESC
-  function onDocumentKeyUp( event ) {
-    if( event.keyCode === 27 ) {
-      deactivate();
-    }
-  }
-
-  // Deactivate on click outside
-  function onDocumentClick( event ) {
-    if( event.target === cover ) {
-      deactivate();
-    }
-  }
-
-  function activate( state ) {
-    document.addEventListener( 'keyup', onDocumentKeyUp, false );
-    document.addEventListener( 'click', onDocumentClick, false );
-    document.addEventListener( 'touchstart', onDocumentClick, false );
-
-    removeClass( popup, currentState );
-    addClass( popup, 'no-transition' );
-    addClass( popup, state );
-
-    setTimeout( function() {
-      removeClass( popup, 'no-transition' );
-      addClass( container, 'avgrund-active' );
-    }, 0 );
-
-    currentState = state;
-  }
-
-  function deactivate() {
-    document.removeEventListener( 'keyup', onDocumentKeyUp, false );
-    document.removeEventListener( 'click', onDocumentClick, false );
-    document.removeEventListener( 'touchstart', onDocumentClick, false );
-
-    removeClass( container, 'avgrund-active' );
-    removeClass( popup, 'avgrund-popup-animate')
-  }
-
-  function disableBlur() {
-    addClass( document.documentElement, 'no-blur' );
-  }
-
   function addClass( element, name ) {
     element.className = element.className.replace( /\s+$/gi, '' ) + ' ' + name;
   }
@@ -100,26 +6,14 @@ var Avgrund = (function(){
   function removeClass( element, name ) {
     element.className = element.className.replace( name, '' );
   }
-
-  function show(selector){
-    popup = document.querySelector( selector );
-    addClass(popup, 'avgrund-popup-animate');
-    activate();
-    return this;
-  }
-  function hide() {
-    deactivate();
-  }
-
-  return {
-    activate: activate,
-    deactivate: deactivate,
-    disableBlur: disableBlur,
-    show: show,
-    hide: hide
-  }
-
-})();
+  document.querySelector('#krugman-faq').addEventListener('click', function(event) {
+    addClass(document.querySelector('#shell'), 'flipped');
+    event.preventDefault();
+  });
+  document.querySelector('#krugman-faq-close').addEventListener('click', function(event) {
+    removeClass(document.querySelector('#shell'), 'flipped');
+    event.preventDefault();
+  });
 </script>
 
 <script type="text/javascript">

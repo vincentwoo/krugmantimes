@@ -1,3 +1,5 @@
+_ = require 'underscore'
+
 String.prototype.titlecase = ->
   this.split(' ').map (str) ->
     ret = str.trim().split('')
@@ -14,6 +16,6 @@ String.prototype.sentencecase = ->
 
 Array.prototype.sample = (number) ->
   if number == undefined
-    if this.length > 0 then this[Math.floor(Math.random(this.length))] else null
+    if this.length > 0 then this[_.random(this.length - 1)] else null
   else
     if number > 0 then _.shuffle(this).slice(0, number) else []

@@ -27,10 +27,12 @@ retrieve_nytimes = (cb) ->
     $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
-    $('#date').html 'A Version Of The New York Times By Its Only Columnist <a id="krugman-faq" href="">(what is this?)</a>'
-    $('#page').addClass 'avgrund-contents'
+    $('#date').html(
+      'A Version Of The New York Times By Its Only Columnist ' +
+      '<a id="krugman-faq" href="#">(what is this?)</a>')
     $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
+    $('#shell').html "<div id=\"flip-wrap\">#{$('#shell').html()}</div>#{MODAL_INJECT}"
 
     $('img').each (idx, element) ->
       element = $(element)
@@ -187,5 +189,6 @@ filenames.forEach (filename, idx) ->
   dimensions.path = "/images/krugmanz/#{filename}"
   KRUGMANZ[idx] = dimensions
 
-BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
 HEAD_INJECT = fs.readFileSync './inject/head.html', 'utf8'
+BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
+MODAL_INJECT = fs.readFileSync './inject/modal.html', 'utf8'
