@@ -26,7 +26,7 @@ retrieve_nytimes = (cb) ->
     console.log "Loaded nytimes.com - #{Math.floor(body.length/1024)}kb"
     $ = cheerio.load body, lowerCaseTags: true
 
-    $('body').append TRACKING
+    $('body').append(TRACKING).append(RIBBON)
     $('head').append CSS
 
     $('title').text 'The Krugman Times'
@@ -197,6 +197,11 @@ TRACKING = """
   """
 CSS = """
   <style>
+    #shell {
+      position: relative;
+      z-index: 100;
+      background: #fff;
+    }
     .krugman-container {
         display: inline-block;
         position: relative;
@@ -221,6 +226,13 @@ CSS = """
     }
   </style>
   """
+RIBBON = """
+  <a href="https://github.com/vincentwoo/krugmantimes">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+      src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png"
+      alt="Fork me on GitHub">
+  </a>
+"""
 
 String.prototype.titlecase = ->
   this.split(' ').map (str) ->
