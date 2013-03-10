@@ -29,7 +29,7 @@ retrieve_nytimes = (cb) ->
     $('title').text 'The Krugman Times'
     $('#date').html(
       'A Version Of The New York Times By Its Only Columnist ' +
-      '<a id="krugman-faq" href="#">(what is this?)</a>')
+      '(<a id="krugman-faq" href="#">what is this?</a>)')
     $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
     $('#shell').html "<div id=\"flip-wrap\">#{$('#shell').html()}</div>#{MODAL_INJECT}"
