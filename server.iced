@@ -145,6 +145,8 @@ else
   expiry = 0
   ip = ':remote-addr'
 
+db.on 'error', (err) -> console.log('REDIS ERR: ' + err);
+
 app.use express.static(__dirname + '/public', maxAge: maxAge)
 app.use express.logger("#{ip} - :status(:method): :response-time ms - :url")
 app.use express.compress()
