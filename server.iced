@@ -62,7 +62,6 @@ retrieve_nytimes = (cb) ->
           story.find('li>a, h6>a')
         else
           story.find('h2>a, h3>a, h5>a')
-        console.log headlines.text()
         summaries = story.find('.summary')
         text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
         return unless text.length > 50
@@ -88,12 +87,11 @@ retrieve_nytimes = (cb) ->
 
 extract_keywords = (text, cb) ->
   hash = crypto.createHash('md5').update(text).digest('hex');
-  console.log "Requesting keyword extraction for text with fingerprint #{hash}"
   await db.get "text:#{hash}", defer err, reply
   if reply
-    console.log "Cache hit for text with fingerprint #{hash}"
     return cb JSON.parse(reply)
 
+  console.log "Requesting keyword extraction for text with fingerprint #{hash}"
   request
     url: 'http://access.alchemyapi.com/calls/text/TextGetRankedKeywords'
     method: 'post'
@@ -108,7 +106,6 @@ extract_keywords = (text, cb) ->
       return cb([]) unless keywords.status == 'OK'
 
       keywords = (keyword.text for keyword in keywords.keywords when keyword.text.length > 4)
-      console.log "Found keywords: #{keywords.slice(0, 5).join(', ')}..."
 
       krugmanizms = KRUGMANIZMS.sample keywords.length
       keywords = keywords.map((keyword) ->
