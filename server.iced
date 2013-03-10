@@ -26,10 +26,8 @@ retrieve_nytimes = (cb) ->
     console.log "Loaded nytimes.com - #{Math.floor(body.length/1024)}kb"
     $ = cheerio.load body, lowerCaseTags: true
 
-    $('body').append(TRACKING).append(RIBBON)
-    $('head').append CSS
-
     $('title').text 'The Krugman Times'
+    $('#date').html 'A Version Of The New York Times By Its Only Columnist <a id="krugman-faq" href="">(what is this?)</a>'
     $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
 
@@ -55,9 +53,13 @@ retrieve_nytimes = (cb) ->
     $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
 
     await
-      $('#main .baseLayout .story, #photoSpotRegion .columnGroup').each ->
+      $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
         story = $(this)
-        headlines = story.find('h2, h3, h5')
+        headlines = if story.hasClass('headlinesOnly')
+          story.find('li>a, h6>a')
+        else
+          story.find('h2>a, h3>a, h5>a')
+        console.log headlines.text()
         summaries = story.find('.summary')
         text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
         return unless text.length > 50
@@ -74,6 +76,9 @@ retrieve_nytimes = (cb) ->
           done()
 
     html = $.html()
+    html = html.replace /<\/head>/, HEAD_INJECT + '</head>'
+    html = html.replace /<\/body>/, BODY_INJECT + '</body>'
+
     db.set '/', html
     db.expire '/', expiry
     cb html
@@ -163,12 +168,11 @@ console.log 'Express middleware installed'
 KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANIZMS = [
   'New Keynesianism'
-  'stimulus'
+  'stimulus package'
   'market efficiency'
   'deficit spending'
   'financial crisis'
   'shadow banking system'
-  'debt ceiling'
   'liquidity trap'
   'Paul Krugman'
 ]
@@ -182,57 +186,8 @@ filenames.forEach (filename, idx) ->
   dimensions.path = "/images/krugmanz/#{filename}"
   KRUGMANZ[idx] = dimensions
 
-TRACKING = """
-  <script type="text/javascript">
-    var _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-38200823-1']);
-    _gaq.push(['_setDomainName', 'krugmantimes.com']);
-    _gaq.push(['_trackPageview']);
-    (function() {
-      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-    })();
-  </script>
-  """
-CSS = """
-  <style>
-    #shell {
-      position: relative;
-      z-index: 100;
-      background: #fff;
-    }
-    .krugman-container {
-        display: inline-block;
-        position: relative;
-        width: 100%;
-    }
-    .krugman-dummy {
-        padding-top: 75%; /* 4:3 aspect ratio */
-    }
-    .krugman-element {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-size: cover;
-        background-position: center center;
-    }
-    .krugman-photo {
-      display: inline-block;
-      background-size: cover;
-      background-position: center center;
-    }
-  </style>
-  """
-RIBBON = """
-  <a href="https://github.com/vincentwoo/krugmantimes">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-      src="https://s3.amazonaws.com/github/ribbons/forkme_left_darkblue_121621.png"
-      alt="Fork me on GitHub">
-  </a>
-"""
+BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
+HEAD_INJECT = fs.readFileSync './inject/head.html', 'utf8'
 
 String.prototype.titlecase = ->
   this.split(' ').map (str) ->
