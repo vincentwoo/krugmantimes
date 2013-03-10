@@ -8,7 +8,7 @@ cheerio = require 'cheerio'
 request = require 'request'
 fs      = require 'fs'
 gm      = require('gm').subClass imageMagick: true
-_       = require 'underscore'
+require './extensions'
 
 KRUGMANZ = [] # array of krugman images
 KRUGMANIZMS = [] # array of krugman sayings
@@ -118,7 +118,7 @@ extract_keywords = (text, cb) ->
       cb keywords
 
 fit_krugman_photo = (width, height) ->
-  photo = KRUGMANZ[_.random(KRUGMANZ.length - 1)]
+  photo = KRUGMANZ.sample
   if width && height
     """
       <div class="krugman-photo"
@@ -189,23 +189,3 @@ filenames.forEach (filename, idx) ->
 
 BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
 HEAD_INJECT = fs.readFileSync './inject/head.html', 'utf8'
-
-String.prototype.titlecase = ->
-  this.split(' ').map (str) ->
-    ret = str.trim().split('')
-    return '' if ret.length == 0
-    ret[0] = ret[0].toUpperCase();
-    ret.join('')
-  .join(' ')
-
-String.prototype.sentencecase = ->
-  ret = this.trim()
-  ret = ret.charAt(0).toUpperCase() + ret.slice(1)
-  ret.replace /([.?!]\s+)(\w)/g, (match, pre, char) ->
-    pre + char.toUpperCase();
-
-Array.prototype.sample = (number) ->
-  if number == undefined
-    if this.length > 0 then this[_.random(obj.length - 1)] else null
-  else
-    if number > 0 then _.shuffle(this).slice(0, number) else []

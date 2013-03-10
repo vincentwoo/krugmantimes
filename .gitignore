@@ -1,4 +1,5 @@
 node_modules
 .env
 server.js
+extensions.js
 .DS_Store

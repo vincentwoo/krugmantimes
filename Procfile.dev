@@ -1,2 +1,2 @@
-web: ./node_modules/supervisor/lib/cli-wrapper.js --extensions 'js|html' --no-restart-on exit server.js
-watch: ./node_modules/iced-coffee-script/bin/coffee --watch --compile server.iced
+web: ./node_modules/supervisor/lib/cli-wrapper.js --extensions 'iced|html' --no-restart-on exit server.js
+watch: ./node_modules/iced-coffee-script/bin/coffee --watch --lint --compile *.iced
