@@ -118,7 +118,7 @@ extract_keywords = (text, cb) ->
       cb keywords
 
 fit_krugman_photo = (width, height) ->
-  photo = KRUGMANZ.sample
+  photo = KRUGMANZ.sample()
   if width && height
     """
       <div class="krugman-photo"
