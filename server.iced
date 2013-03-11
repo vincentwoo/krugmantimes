@@ -181,7 +181,7 @@ if process.env.NODE_ENV == 'production'
   redisURL = url.parse process.env.REDISCLOUD_URL
   db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   db.auth redisURL.auth.split(':')[1]
-  maxAge = 86400000
+  maxAge = 604800000
   expiry = 60
   ip = ':req[X-Forwarded-For]'
 else
