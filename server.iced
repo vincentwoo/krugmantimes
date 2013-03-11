@@ -8,6 +8,7 @@ cheerio = require 'cheerio'
 request = require 'request'
 fs      = require 'fs'
 gm      = require('gm').subClass imageMagick: true
+_       = require 'underscore'
 require './extensions'
 
 KRUGMANZ = [] # array of krugman images
@@ -54,6 +55,7 @@ retrieve_nytimes = (cb) ->
       $(this).replaceWith fit_krugman_photo(50, 50)
 
     $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
+    $('.extendedVideoPocketPlayerContainer').html fit_krugman_photo()
 
     await
       $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
@@ -116,8 +118,10 @@ extract_keywords = (text, cb) ->
       db.set "text:#{hash}", JSON.stringify(keywords)
       cb keywords
 
+current_krugmanz = []
 fit_krugman_photo = (width, height) ->
-  photo = KRUGMANZ.sample()
+  current_krugmanz = _.shuffle(KRUGMANZ) if current_krugmanz.length == 0
+  photo = current_krugmanz.pop()
   if width && height
     """
       <div class="krugman-photo"
