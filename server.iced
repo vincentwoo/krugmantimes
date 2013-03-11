@@ -83,6 +83,7 @@ retrieve_nytimes = (cb) ->
 
 perform_substitutions = (elem, keywords, titlecase) ->
   text = elem.html()
+  return if text.indexOf('krugman-highlight') != -1 # we've been here before
 
   for keyword in keywords
     regex = new RegExp keyword.phrase, 'gm'
@@ -95,8 +96,10 @@ perform_substitutions = (elem, keywords, titlecase) ->
           keyword.replacement.capitalize()
         else
           keyword.replacement
-      "<span class=\"krugman-old\">#{matched}</span>" +
-      "<span class=\"krugman-new\">#{replace}</span>"
+      '<span class="krugman-highlight">' +
+        "<span class=\"old\">#{matched}</span>" +
+        "<span class=\"new\">#{replace}</span>" +
+      '</span>'
 
   elem.html text
 

@@ -2,10 +2,10 @@
   function addClass( element, name ) {
     element.className = element.className.replace( /\s+$/gi, '' ) + ' ' + name;
   }
-
   function removeClass( element, name ) {
     element.className = element.className.replace( name, '' );
   }
+
   document.querySelector('#krugman-faq').addEventListener('click', function(event) {
     addClass(document.querySelector('#shell'), 'flipped');
     event.preventDefault();
@@ -13,6 +13,21 @@
   document.querySelector('#krugman-faq-close').addEventListener('click', function(event) {
     removeClass(document.querySelector('#shell'), 'flipped');
     event.preventDefault();
+  });
+
+  var toggle = true;
+  document.addEventListener('keypress', function(event) {
+    if ((event.keyCode || event.which) != 63) return;
+
+    var elems = document.querySelectorAll('.krugman-highlight');
+
+    for (var i = 0; i < elems.length; i++) {
+      var elem = elems[i];
+      if (toggle) addClass(elem, 'active');
+      else removeClass(elem, 'active');
+    }
+
+    toggle = !toggle;
   });
 </script>
 <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>

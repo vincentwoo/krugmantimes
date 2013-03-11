@@ -98,10 +98,22 @@
     background-size: cover;
     background-position: center center;
   }
-  .krugman-old {
+  .krugman-highlight {
+    -webkit-transition: 1s background;
+  }
+  .krugman-highlight.active {
+    background: #f1f6b7
+  }
+  .krugman-highlight .new {
+    display: inline;
+  }
+  .krugman-highlight.active .new {
     display: none;
   }
-  .krugman-new {
-
+  .krugman-highlight .old {
+    display: none;
+  }
+  .krugman-highlight.active .old {
+    display: inline;
   }
 </style>
