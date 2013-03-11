@@ -1,7 +1,6 @@
 _ = require 'underscore'
 
 String.prototype.titlecase = ->
-  console.log this + '' if this.indexOf('deficit') != -1
   this.split(/\s/).map (str) ->
     ret = str.trim().split('')
     return '' if ret.length == 0
@@ -9,11 +8,9 @@ String.prototype.titlecase = ->
     ret.join('')
   .join(' ')
 
-String.prototype.sentencecase = ->
+String.prototype.capitalize = ->
   ret = this.trim()
   ret = ret.charAt(0).toUpperCase() + ret.slice(1)
-  ret.replace /([.?!]\s+)(\w)/g, (match, pre, char) ->
-    pre + char.toUpperCase();
 
 Array.prototype.sample = (number) ->
   if number == undefined

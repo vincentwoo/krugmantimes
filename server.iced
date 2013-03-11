@@ -57,27 +57,20 @@ retrieve_nytimes = (cb) ->
     $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
     $('.extendedVideoPocketPlayerContainer').html fit_krugman_photo()
 
-    await
-      $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
-        story = $(this)
-        headlines = if story.hasClass('headlinesOnly')
-          story.find('li>a:not(.thumb), h6>a')
-        else
-          story.find('h2>a, h3>a, h5>a')
-        summaries = story.find('.summary')
-        text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
-        return unless text.length > 50
-        done = defer()
-        extract_keywords text, (keywords) ->
-          keywords.forEach (keyword) ->
-            regex = new RegExp "(\\W)#{keyword.phrase}(\\W)", 'g'
-            headlines.toArray().concat(summaries.toArray()).forEach (elem) ->
-              $(elem).text($(elem).text().replace regex, "$1#{keyword.replacement}$2")
-            headlines.each ->
-              $(this).text($(this).text().titlecase())
-            summaries.each ->
-              $(this).text($(this).text().sentencecase())
-          done()
+    stories = $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').toArray()
+
+    for elem in stories
+      story = $(elem)
+      headlines = if story.hasClass('headlinesOnly')
+        story.find('li>a:not(.thumb), h6>a')
+      else
+        story.find('h2>a, h3>a, h5>a')
+      summaries = story.find('.summary')
+      text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
+      continue unless text.length > 50
+      await extract_keywords text, defer keywords
+      headlines.each -> perform_substitutions $(this), keywords, true
+      summaries.each -> perform_substitutions $(this), keywords, false
 
     html = $.html()
     html = html.replace /<\/head>/, HEAD_INJECT + '</head>'
@@ -86,6 +79,26 @@ retrieve_nytimes = (cb) ->
     db.set '/', html
     db.expire '/', expiry
     cb html
+
+perform_substitutions = (elem, keywords, titlecase) ->
+  text = elem.html()
+
+  for keyword in keywords
+    regex = new RegExp keyword.phrase, 'gm'
+    text = text.replace regex, (matched, offset, str) ->
+      if titlecase
+        replace = keyword.replacement.titlecase()
+      else
+        prior = str.substr 0, offset
+        replace = if prior.match /([.!?]|^)\s*$/
+          keyword.replacement.capitalize()
+        else
+          keyword.replacement
+      "<span class=\"krugman-old\">#{matched}</span>" +
+      "<span class=\"krugman-new\">#{replace}</span>"
+
+  console.log text if text.indexOf('Rape') != -1
+  elem.html text
 
 extract_keywords = (text, cb) ->
   hash = crypto.createHash('md5').update(text).digest('hex');
