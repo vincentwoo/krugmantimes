@@ -28,12 +28,24 @@ retrieve_nytimes = (cb) ->
     $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
-    $('#date').html(
-      'A Version Of The New York Times By Its Only Columnist ' +
-      '(<a id="krugman-faq" href="#">what is this?</a>)')
-    $('.byline').text 'By PAUL KRUGMAN'
     $('script, .adWrapper, .singleAd, .advertisement').remove()
-    $('#shell').html "<div id=\"flip-wrap\">#{$('#shell').html()}</div>#{MODAL_INJECT}"
+    $('#shell').html """
+      <div id="flip-wrap">#{$('#shell').html()}</div>
+      #{MODAL_INJECT}
+    """
+    $('.byline').each ->
+     $(this).html """
+        By
+        <span class="krugman-highlight">
+          <span class="new">PAUL KRUGMAN</span>
+          <span class="old">#{$(this).text().substr(3)}</span>
+        </span>
+      """
+    $('#date').html """
+      The New York Times By Its Only Columnist <br>
+      Press the <span>?</span> key to reveal a surprise, or
+      <a id="krugman-faq" href="#">read about what this is</a>
+    """
 
     $('img').each (idx, element) ->
       element = $(element)
@@ -49,13 +61,13 @@ retrieve_nytimes = (cb) ->
       height = +element.attr 'height'
       return unless width > 40 && height > 40
 
-      element.replaceWith fit_krugman_photo(width, height)
+      fit_krugman_photo($, element, width, height)
 
     $('.headlinesOnly .thumb img').each ->
-      $(this).replaceWith fit_krugman_photo(50, 50)
+      fit_krugman_photo($, $(this), 50, 50)
 
-    $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
-    $('.extendedVideoPocketPlayerContainer').html fit_krugman_photo()
+    $('#photoSpotRegion .columnGroup.first .image, .extendedVideoPocketPlayerContainer').each ->
+      fit_krugman_photo($, $(this))
 
     await
       $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
@@ -135,25 +147,34 @@ extract_keywords = (text, cb) ->
       cb keywords
 
 current_krugmanz = []
-fit_krugman_photo = (width, height) ->
+fit_krugman_photo = ($, element, width, height) ->
   current_krugmanz = _.shuffle(KRUGMANZ) if current_krugmanz.length == 0
   photo = current_krugmanz.pop()
-  if width && height
+  contents = if width && height
     """
-      <div class="krugman-photo"
+      <div class="krugman-photo new"
         style="width: #{width}px; height: #{height}px;
         background-image: url('#{photo.path}');">
       </div>
     """
   else
     """
-      <div class="krugman-container">
+      <div class="krugman-container new">
           <div class="krugman-dummy"></div>
           <div class="krugman-element"
             style="background-image: url('#{photo.path}');">
           </div>
       </div>
     """
+  contents = """
+    <div class="krugman-highlight block">
+      #{contents}
+      <div class="old">
+        #{$.html(element)}
+      </div>
+    </div>
+  """
+  element.replaceWith contents
 
 if process.env.NODE_ENV == 'production'
   console.log 'Initializing krugmantimes for production'

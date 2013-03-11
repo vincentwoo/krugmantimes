@@ -23,9 +23,27 @@
 
     for (var i = 0; i < elems.length; i++) {
       var elem = elems[i];
-      if (toggle) addClass(elem, 'active');
-      else removeClass(elem, 'active');
+      addClass(elem, 'active');
     }
+
+    setTimeout(function() {
+      for (var i = 0; i < elems.length; i++) {
+        var elem = elems[i];
+        removeClass(elem, 'active');
+      }
+    }, 3000);
+
+    (function(toggle) {
+      for (var i = 0; i < elems.length; i++) {
+        (function(i) {
+          setTimeout(function() {
+            var elem = elems[i];
+            if (toggle) addClass(elem, 'flipped');
+            else removeClass(elem, 'flipped');
+          }, 1500 + i * 10);
+        })(i);
+      }
+    })(toggle);
 
     toggle = !toggle;
   });
