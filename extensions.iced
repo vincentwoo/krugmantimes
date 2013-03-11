@@ -1,7 +1,8 @@
 _ = require 'underscore'
 
 String.prototype.titlecase = ->
-  this.split(' ').map (str) ->
+  console.log this + '' if this.indexOf('deficit') != -1
+  this.split(/\s/).map (str) ->
     ret = str.trim().split('')
     return '' if ret.length == 0
     ret[0] = ret[0].toUpperCase();

@@ -175,6 +175,12 @@ KRUGMANIZMS = [
   'shadow banking system'
   'liquidity trap'
   'Paul Krugman'
+  'economies of scale'
+  'utility function'
+  'multiple equilibria'
+  'quantitative easing'
+  'market correction'
+  'monetary policy'
 ]
 console.log 'Reading directory of krugman images'
 await fs.readdir KRUGMANZ_DIR, defer err, filenames
