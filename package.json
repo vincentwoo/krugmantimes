@@ -4,7 +4,6 @@
   "dependencies": {
     "cheerio":            "0.x",
     "express":            "3.x",
-    "gm":                 "1.x",
     "iced-coffee-script": "1.x",
     "newrelic":           "x",
     "redis":              "0.x",

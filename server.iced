@@ -7,7 +7,6 @@ url     = require 'url'
 cheerio = require 'cheerio'
 request = require 'request'
 fs      = require 'fs'
-gm      = require('gm').subClass imageMagick: true
 _       = require 'underscore'
 require './extensions'
 
@@ -154,7 +153,7 @@ fit_krugman_photo = ($, element, width, height) ->
     """
       <div class="krugman-photo new"
         style="width: #{width}px; height: #{height}px;
-        background-image: url('#{photo.path}');">
+        background-image: url('#{photo}');">
       </div>
     """
   else
@@ -162,7 +161,7 @@ fit_krugman_photo = ($, element, width, height) ->
       <div class="krugman-container new">
           <div class="krugman-dummy"></div>
           <div class="krugman-element"
-            style="background-image: url('#{photo.path}');">
+            style="background-image: url('#{photo}');">
           </div>
       </div>
     """
@@ -206,7 +205,6 @@ app.get '/', (req, res) ->
 app.listen process.env.PORT || 5000
 console.log 'Express middleware installed'
 
-KRUGMANZ_DIR = __dirname + '/public/images/krugmanz'
 KRUGMANIZMS = [
   'New Keynesianism'
   'stimulus package'
@@ -223,16 +221,9 @@ KRUGMANIZMS = [
   'market correction'
   'monetary policy'
 ]
-console.log 'Reading directory of krugman images'
-await fs.readdir KRUGMANZ_DIR, defer err, filenames
-console.log 'Images found, getting their dimensions'
-filenames.forEach (filename, idx) ->
-  await gm("#{KRUGMANZ_DIR}/#{filename}").size defer err, dimensions
-  console.log "Krugman #{idx} loaded, #{dimensions.width}px x #{dimensions.height}px"
-  dimensions.ratio = dimensions.width / dimensions.height
-  dimensions.path = "/images/krugmanz/#{filename}"
-  KRUGMANZ[idx] = dimensions
 
+KRUGMANZ = fs.readdirSync(__dirname + '/public/images/krugmanz')
+  .map (filename) -> "/images/krugmanz//#{filename}"
 HEAD_INJECT = fs.readFileSync './inject/head.html', 'utf8'
 BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
 MODAL_INJECT = fs.readFileSync './inject/modal.html', 'utf8'
