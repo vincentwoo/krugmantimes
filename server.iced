@@ -223,7 +223,7 @@ KRUGMANIZMS = [
 ]
 
 KRUGMANZ = fs.readdirSync(__dirname + '/public/images/krugmanz')
-  .map (filename) -> "/images/krugmanz//#{filename}"
+  .map (filename) -> "/images/krugmanz/#{filename}"
 HEAD_INJECT = fs.readFileSync './inject/head.html', 'utf8'
 BODY_INJECT = fs.readFileSync './inject/body.html', 'utf8'
 MODAL_INJECT = fs.readFileSync './inject/modal.html', 'utf8'
