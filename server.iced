@@ -65,7 +65,13 @@ retrieve_nytimes = (cb) ->
     $('.headlinesOnly .thumb img').each ->
       fit_krugman_photo($, $(this), 50, 50)
 
-    $('#photoSpotRegion .columnGroup.first .image, .extendedVideoPocketPlayerContainer, #timescastVideoPlayerContainer').each ->
+    imageRegions = [
+      '#photoSpotRegion .columnGroup.first .image'
+      '.extendedVideoPocketPlayerContainer'
+      '#timescastVideoPlayerContainer'
+      '#photospotVideoPlayerContainer'
+    ]
+    $(imageRegions.join(', ')).each ->
       fit_krugman_photo($, $(this))
 
     await
