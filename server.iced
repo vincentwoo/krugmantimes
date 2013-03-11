@@ -57,20 +57,21 @@ retrieve_nytimes = (cb) ->
     $('#photoSpotRegion .columnGroup.first').html fit_krugman_photo()
     $('.extendedVideoPocketPlayerContainer').html fit_krugman_photo()
 
-    stories = $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').toArray()
-
-    for elem in stories
-      story = $(elem)
-      headlines = if story.hasClass('headlinesOnly')
-        story.find('li>a:not(.thumb), h6>a')
-      else
-        story.find('h2>a, h3>a, h5>a')
-      summaries = story.find('.summary')
-      text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
-      continue unless text.length > 50
-      await extract_keywords text, defer keywords
-      headlines.each -> perform_substitutions $(this), keywords, true
-      summaries.each -> perform_substitutions $(this), keywords, false
+    await
+      $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
+        story = $(this)
+        headlines = if story.hasClass('headlinesOnly')
+          story.find('li>a:not(.thumb), h6>a')
+        else
+          story.find('h2>a, h3>a, h5>a')
+        summaries = story.find('.summary')
+        text = "#{headlines.text().trim()} \n #{summaries.text().trim()}"
+        return unless text.length > 50
+        done = defer()
+        extract_keywords text, (keywords) ->
+          headlines.each -> perform_substitutions $(this), keywords, true
+          summaries.each -> perform_substitutions $(this), keywords, false
+          done()
 
     html = $.html()
     html = html.replace /<\/head>/, HEAD_INJECT + '</head>'
@@ -97,7 +98,6 @@ perform_substitutions = (elem, keywords, titlecase) ->
       "<span class=\"krugman-old\">#{matched}</span>" +
       "<span class=\"krugman-new\">#{replace}</span>"
 
-  console.log text if text.indexOf('Rape') != -1
   elem.html text
 
 extract_keywords = (text, cb) ->
