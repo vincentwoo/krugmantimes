@@ -52,8 +52,8 @@ retrieve_nytimes = (cb) ->
       if element.attr('id') == 'mastheadLogo'
         element.attr 'src', '/images/krugman_times_logo.png'
         return element.parent().replaceWith(element) # replace noscript tag with image
-
-      if (element.attr('src') || element.attr('SRC')).indexOf('/adx/') != -1
+      src = element.attr('src') || element.attr('SRC')
+      if src && src.indexOf('/adx/') != -1
         return element.remove() # kill some ad images
 
       width  = +element.attr 'width'
@@ -65,7 +65,7 @@ retrieve_nytimes = (cb) ->
     $('.headlinesOnly .thumb img').each ->
       fit_krugman_photo($, $(this), 50, 50)
 
-    $('#photoSpotRegion .columnGroup.first .image, .extendedVideoPocketPlayerContainer').each ->
+    $('#photoSpotRegion .columnGroup.first .image, .extendedVideoPocketPlayerContainer, #timescastVideoPlayerContainer').each ->
       fit_krugman_photo($, $(this))
 
     await
