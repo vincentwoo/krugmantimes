@@ -10,15 +10,22 @@
     addClass(document.querySelector('#shell'), 'flipped');
     event.preventDefault();
   });
-  document.querySelector('#krugman-faq-close').addEventListener('click', function(event) {
-    removeClass(document.querySelector('#shell'), 'flipped');
-    event.preventDefault();
-  });
+
+  var closers = document.querySelectorAll('#krugman-faq-popup button, #krugman-faq-popup span');
+  for (var i = 0; i < closers.length; i++) {
+    closers[i].addEventListener('click', function(event) {
+      removeClass(document.querySelector('#shell'), 'flipped');
+      event.preventDefault();
+    });
+  }
 
   var toggle = true;
   document.addEventListener('keypress', function(event) {
-    if ((event.keyCode || event.which) != 63) return;
+    if ((event.keyCode || event.which) == 63) swap();
+  });
+  document.querySelector('#date span').addEventListener('click', swap);
 
+  function swap() {
     var elems = document.querySelectorAll('.krugman-highlight');
 
     for (var i = 0; i < elems.length; i++) {
@@ -46,7 +53,7 @@
     })(toggle);
 
     toggle = !toggle;
-  });
+  }
 </script>
 <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
 <script type="text/javascript">
