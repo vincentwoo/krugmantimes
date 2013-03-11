@@ -59,7 +59,7 @@ retrieve_nytimes = (cb) ->
       $('.story, #photoSpotRegion .columnGroup, .headlinesOnly').each ->
         story = $(this)
         headlines = if story.hasClass('headlinesOnly')
-          story.find('li>a, h6>a')
+          story.find('li>a:not(.thumb), h6>a')
         else
           story.find('h2>a, h3>a, h5>a')
         summaries = story.find('.summary')
