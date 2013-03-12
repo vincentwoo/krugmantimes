@@ -21,7 +21,8 @@
 
   var toggle = true;
   document.addEventListener('keypress', function(event) {
-    if ((event.keyCode || event.which) == 63) swap();
+    var key = event.keyCode || event.which;
+    if (key == 63 || key == 47) swap();
   });
   document.querySelector('#date span').addEventListener('click', swap);
 
