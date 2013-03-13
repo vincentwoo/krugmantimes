@@ -27,7 +27,7 @@ retrieve_nytimes = (cb) ->
     $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
-    $('script, .adWrapper, .singleAd, .advertisement').remove()
+    $('script, .adWrapper, .singleAd, .advertisement, meta').remove()
     $('#shell').html """
       <div id="flip-wrap">#{$('#shell').html()}</div>
       #{MODAL_INJECT}
