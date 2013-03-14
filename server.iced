@@ -70,6 +70,7 @@ retrieve_nytimes = (cb) ->
       '.extendedVideoPocketPlayerContainer'
       '#timescastVideoPlayerContainer'
       '#photospotVideoPlayerContainer'
+      '.ledePhoto'
     ]
     $(imageRegions.join(', ')).each ->
       fit_krugman_photo($, $(this))
