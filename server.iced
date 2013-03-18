@@ -43,7 +43,8 @@ retrieve_nytimes = (cb) ->
     $('#date').html """
       The New York Times By Its Only Columnist <br>
       Press the <span>?</span> key to reveal a surprise, or
-      <a id="krugman-faq" href="#">read about what this is</a>
+      <a id="krugman-faq" href="#">read about what this is</a> <br>
+      <small>The New York Times trademarks and copyright-protected material used with permission of The New York Times Company © 2013</small>
     """
 
     $('img').each (idx, element) ->
