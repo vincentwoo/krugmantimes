@@ -24,7 +24,7 @@
     var key = event.keyCode || event.which;
     if (key == 63 || key == 47) swap();
   });
-  document.querySelector('#date span').addEventListener('click', swap);
+  document.querySelector('.krugman-explanation span').addEventListener('click', swap);
 
   function swap() {
     var elems = document.querySelectorAll('.krugman-highlight');

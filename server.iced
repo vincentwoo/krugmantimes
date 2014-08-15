@@ -27,7 +27,13 @@ retrieve_nytimes = (cb) ->
     $ = cheerio.load body, lowerCaseTags: true
 
     $('title').text 'The Krugman Times'
-    $('script, .adWrapper, .singleAd, .advertisement, meta').remove()
+    $('.adWrapper, .singleAd, .advertisement, meta, .ad').remove()
+    $('script').each (idx, element) ->
+      element = $(element)
+      unless element.attr('src')?.indexOf('typeface.nytimes') > 0 ||
+              element.text().indexOf('Typekit') > 0
+        element.remove()
+
     $('#shell').html """
       <div id="flip-wrap">#{$('#shell').html()}</div>
       #{MODAL_INJECT}
@@ -40,19 +46,20 @@ retrieve_nytimes = (cb) ->
           <span class="old">#{$(this).text().substr(3)}</span>
         </span>
       """
-    $('#date').html """
-      The New York Times By Its Only Columnist <br>
-      Press the <span>?</span> key to reveal a surprise, or
-      <a id="krugman-faq" href="#">read about what this is</a> <br>
-      <small>The New York Times trademarks and copyright-protected material used with permission of The New York Times Company © 2013</small>
+    $('.masthead-menu').replaceWith """
+      <div class="krugman-explanation">
+        The New York Times By Its Only Columnist <br>
+        Press the <span>?</span> key to reveal a surprise, or
+        <a id="krugman-faq" href="#">read about what this is</a> <br>
+        <small>The New York Times trademarks and copyright-protected material used with permission of The New York Times Company © 2013</small>
+      </div>
     """
+
+    $('.nyt-logo').replaceWith('<img src="/images/krugman_times_logo.png" />')
 
     $('img').each (idx, element) ->
       element = $(element)
 
-      if element.attr('id') == 'mastheadLogo'
-        element.attr 'src', '/images/krugman_times_logo.png'
-        return element.parent().replaceWith(element) # replace noscript tag with image
       src = element.attr('src') || element.attr('SRC')
       if src && src.indexOf('/adx/') != -1
         return element.remove() # kill some ad images
@@ -72,6 +79,7 @@ retrieve_nytimes = (cb) ->
       '#timescastVideoPlayerContainer'
       '#photospotVideoPlayerContainer'
       '.ledePhoto'
+      '.media.photo'
     ]
     $(imageRegions.join(', ')).each ->
       fit_krugman_photo($, $(this))
