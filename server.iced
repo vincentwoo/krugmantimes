@@ -113,7 +113,7 @@ perform_substitutions = (elem, keywords, titlecase) ->
   return if text.indexOf('krugman-highlight') != -1 # we've been here before
 
   for keyword in keywords
-    regex = new RegExp keyword.phrase, 'gm'
+    regex = new RegExp keyword.phrase.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1"), 'gm'
     text = text.replace regex, (matched, offset, str) ->
       if titlecase
         replace = keyword.replacement.titlecase()
