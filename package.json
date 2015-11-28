@@ -1,20 +1,20 @@
 {
   "name": "krugmantimes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "dependencies": {
-    "cheerio":            "0.x",
+    "cheerio":            "*",
     "express":            "3.x",
-    "iced-coffee-script": "1.x",
-    "newrelic":           "x",
-    "redis":              "0.x",
-    "request":            "2.x",
-    "underscore":         "1.x"
+    "iced-coffee-script": "*",
+    "newrelic":           "*",
+    "redis":              "*",
+    "request":            "*",
+    "underscore":         "*"
   },
   "devDependencies": {
     "supervisor":         "0.x"
   },
   "engines": {
-    "node": "0.10.x",
-    "npm": "1.2.x"
+    "node": "5.x",
+    "npm": "3.x"
   }
 }

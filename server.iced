@@ -31,7 +31,7 @@ retrieve_nytimes = (cb) ->
     $('script').each (idx, element) ->
       element = $(element)
       unless element.attr('src')?.indexOf('typeface.nytimes') > 0 ||
-              element.text().indexOf('Typekit') > 0
+          element.text().indexOf('Typekit') > 0
         element.remove()
 
     $('#shell').html """
@@ -80,6 +80,7 @@ retrieve_nytimes = (cb) ->
       '#photospotVideoPlayerContainer'
       '.ledePhoto'
       '.media.photo'
+      'figure.media'
     ]
     $(imageRegions.join(', ')).each ->
       fit_krugman_photo($, $(this))
@@ -104,8 +105,7 @@ retrieve_nytimes = (cb) ->
     html = html.replace /<\/head>/, HEAD_INJECT + '</head>'
     html = html.replace /<\/body>/, BODY_INJECT + '</body>'
 
-    db.set '/', html
-    db.expire '/', expiry
+    db.setex ['/', expiry, html]
     cb html
 
 perform_substitutions = (elem, keywords, titlecase) ->
@@ -193,10 +193,10 @@ fit_krugman_photo = ($, element, width, height) ->
 
 if process.env.NODE_ENV == 'production'
   console.log 'Initializing krugmantimes for production'
-  redisURL = url.parse process.env.REDISCLOUD_URL
+  redisURL = url.parse process.env.REDIS_URL
   db = redis.createClient redisURL.port, redisURL.hostname, no_ready_check: true
   db.auth redisURL.auth.split(':')[1]
-  maxAge = 604800000
+  maxAge = 86400000
   expiry = 60
   ip = ':req[X-Forwarded-For]'
 else
@@ -219,7 +219,9 @@ app.get '/', (req, res) ->
   res.setHeader 'Content-Length', body.length
   res.end body
 
-app.listen process.env.PORT || 5000
+server = app.listen process.env.PORT || 5000, ->
+  {host, port} = server.address()
+  console.log 'listening at http://%s:%s', host, port
 console.log 'Express middleware installed'
 
 KRUGMANIZMS = [
@@ -237,6 +239,7 @@ KRUGMANIZMS = [
   'quantitative easing'
   'market correction'
   'monetary policy'
+  'floating exchange rate'
 ]
 
 KRUGMANZ = fs.readdirSync(__dirname + '/public/images/krugmanz')
