@@ -25,8 +25,10 @@ GEM
     nio4r (2.5.7)
     nokogiri (1.11.1-x86_64-darwin)
       racc (~> 1.4)
+    nokogiri (1.11.1-x86_64-linux)
+      racc (~> 1.4)
     public_suffix (4.0.6)
-    puma (5.2.2)
+    puma (5.3.1)
       nio4r (~> 2.0)
     racc (1.5.2)
     rack (2.2.3)
@@ -52,11 +54,12 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   http (~> 4.4)
   nokogiri (~> 1.11)
-  puma (~> 5.2)
+  puma (~> 5.3)
   sinatra (~> 2.1)
   sinatra-contrib (~> 2.1)
 
