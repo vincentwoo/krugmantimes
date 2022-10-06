@@ -1,8 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.7.0)
-      public_suffix (>= 2.0.2, < 5.0)
+    addressable (2.8.1)
+      public_suffix (>= 2.0.2, < 6.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     ffi (1.14.2)
@@ -25,7 +25,9 @@ GEM
     nio4r (2.5.7)
     nokogiri (1.11.1-x86_64-darwin)
       racc (~> 1.4)
-    public_suffix (4.0.6)
+    nokogiri (1.11.1-x86_64-linux)
+      racc (~> 1.4)
+    public_suffix (5.0.0)
     puma (5.2.2)
       nio4r (~> 2.0)
     racc (1.5.2)
@@ -52,6 +54,7 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   http (~> 4.4)
