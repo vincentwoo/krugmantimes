@@ -23,12 +23,14 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.7)
-    nokogiri (1.11.1-x86_64-darwin)
+    nokogiri (1.13.9-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.13.9-x86_64-linux)
       racc (~> 1.4)
     public_suffix (4.0.6)
     puma (5.2.2)
       nio4r (~> 2.0)
-    racc (1.5.2)
+    racc (1.6.0)
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
@@ -52,10 +54,11 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   http (~> 4.4)
-  nokogiri (~> 1.11)
+  nokogiri (~> 1.13)
   puma (~> 5.2)
   sinatra (~> 2.1)
   sinatra-contrib (~> 2.1)
